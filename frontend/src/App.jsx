@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [applications, setApplications] = useState([]);
@@ -51,7 +52,7 @@ if (sort) {
 }
 
 fetch(
-  `http://127.0.0.1:8000/applications?${params.toString()}`,
+  `${API_URL}/applications?${params.toString()}`,
   {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -79,7 +80,7 @@ fetch(
     console.error(error);
   });
 
-  fetch("http://127.0.0.1:8000/me", {
+  fetch(`${API_URL}/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -111,7 +112,7 @@ fetch(
   function createApplication(event) {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/applications", {
+    fetch(`${API_URL}/applications`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -140,7 +141,7 @@ fetch(
   function updateProfile(event) {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/me", {
+    fetch(`${API_URL}/me`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -174,7 +175,7 @@ fetch(
     formData.append("username", loginEmail);
     formData.append("password", loginPassword);
 
-    fetch("http://127.0.0.1:8000/login", {
+    fetch(`${API_URL}/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -206,7 +207,7 @@ fetch(
   }
 
   function deleteApplication(id) {
-    fetch(`http://127.0.0.1:8000/applications/${id}`, {
+    fetch(`${API_URL}/applications/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -229,7 +230,7 @@ fetch(
       (application) => application.id === id
     );
 
-    fetch(`http://127.0.0.1:8000/applications/${id}`, {
+    fetch(`${API_URL}/applications/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -268,7 +269,7 @@ fetch(
   function registerUser(event) {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/register", {
+    fetch(`${API_URL}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
