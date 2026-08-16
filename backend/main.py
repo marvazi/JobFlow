@@ -119,3 +119,5 @@ def update_application(id: int, new_data: ApplicationUpdate, db: Session = Depen
     db.commit()
     db.refresh(application)
     return application
+
+

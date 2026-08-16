@@ -9,6 +9,14 @@ function App() {
   const [salary, setSalary] = useState("");
   const [status, setStatus] = useState("applied");
   const [notes, setNotes] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const filteredApplications =
+    filter === "all"
+      ? applications
+      : applications.filter(
+          (application) => application.status === filter
+        );
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/applications")
@@ -58,21 +66,44 @@ function App() {
     });
   }
 
-  function formatSalary(salary) {
-    return new Intl.NumberFormat("ru-RU").format(salary);
+  function updateStatus(id, newStatus) {
+    const application = applications.find(
+      (application) => application.id === id
+    );
+
+    fetch(`http://127.0.0.1:8000/applications/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        company: application.company,
+        position: application.position,
+        salary: application.salary,
+        notes: application.notes,
+        status: newStatus,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Ошибка обновления");
+        }
+
+        return response.json();
+      })
+      .then((updatedApplication) => {
+        setApplications(
+          applications.map((application) =>
+            application.id === id
+              ? updatedApplication
+              : application
+          )
+        );
+      });
   }
 
-  function getStatusName(status) {
-    const statuses = {
-      applied: "Отклик",
-      screening: "Скрининг",
-      interview: "Интервью",
-      test_task: "Тестовое",
-      offer: "Оффер",
-      rejected: "Отказ",
-    };
-
-    return statuses[status] || status;
+  function formatSalary(salary) {
+    return new Intl.NumberFormat("ru-RU").format(salary);
   }
 
   const interviewCount = applications.filter(
@@ -243,25 +274,106 @@ function App() {
               </div>
 
               <span className="application-count">
-                {applications.length} вакансий
+                {filteredApplications.length} вакансий
               </span>
             </div>
 
+            <div className="filters">
+              <button
+                className={
+                  filter === "all"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("all")}
+              >
+                Все
+              </button>
+
+              <button
+                className={
+                  filter === "applied"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("applied")}
+              >
+                Отклик
+              </button>
+
+              <button
+                className={
+                  filter === "screening"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("screening")}
+              >
+                Скрининг
+              </button>
+
+              <button
+                className={
+                  filter === "interview"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("interview")}
+              >
+                Интервью
+              </button>
+
+              <button
+                className={
+                  filter === "test_task"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("test_task")}
+              >
+                Тестовое
+              </button>
+
+              <button
+                className={
+                  filter === "offer"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("offer")}
+              >
+                Оффер
+              </button>
+
+              <button
+                className={
+                  filter === "rejected"
+                    ? "filter-button active"
+                    : "filter-button"
+                }
+                onClick={() => setFilter("rejected")}
+              >
+                Отказ
+              </button>
+            </div>
+
             <div className="applications-list">
-              {applications.length === 0 ? (
+              {filteredApplications.length === 0 ? (
                 <div className="empty-state">
                   <div>⌕</div>
-                  <h3>Откликов пока нет</h3>
-                  <p>Добавь первую вакансию слева.</p>
+                  <h3>Ничего не найдено</h3>
+                  <p>Для этого фильтра пока нет вакансий.</p>
                 </div>
               ) : (
-                applications.map((application) => (
+                filteredApplications.map((application) => (
                   <article
                     className="application-card"
                     key={application.id}
                   >
                     <div className="company-avatar">
-                      {application.company.charAt(0).toUpperCase()}
+                      {application.company
+                        .charAt(0)
+                        .toUpperCase()}
                     </div>
 
                     <div className="application-info">
@@ -271,11 +383,23 @@ function App() {
                           <p>{application.position}</p>
                         </div>
 
-                        <span
-                          className={`status status-${application.status}`}
+                        <select
+                          className={`status-select status-${application.status}`}
+                          value={application.status}
+                          onChange={(event) =>
+                            updateStatus(
+                              application.id,
+                              event.target.value
+                            )
+                          }
                         >
-                          {getStatusName(application.status)}
-                        </span>
+                          <option value="applied">Отклик</option>
+                          <option value="screening">Скрининг</option>
+                          <option value="interview">Интервью</option>
+                          <option value="test_task">Тестовое</option>
+                          <option value="offer">Оффер</option>
+                          <option value="rejected">Отказ</option>
+                        </select>
                       </div>
 
                       <div className="application-bottom">
