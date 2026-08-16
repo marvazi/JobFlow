@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+console.log("API_URL:", API_URL);
 function App() {
   const [applications, setApplications] = useState([]);
 
@@ -56,7 +59,7 @@ function App() {
     }
 
     fetch(
-      `http://127.0.0.1:8000/applications?${params.toString()}`,
+      `${API_URL}/applications?${params.toString()}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -68,6 +71,7 @@ function App() {
           localStorage.removeItem("token");
           setToken(null);
           setApplications([]);
+
           throw new Error("Token expired");
         }
 
@@ -84,7 +88,7 @@ function App() {
         console.error(error);
       });
 
-    fetch("http://127.0.0.1:8000/me", {
+    fetch(`${API_URL}/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -94,6 +98,7 @@ function App() {
           localStorage.removeItem("token");
           setToken(null);
           setCurrentUser(null);
+
           throw new Error("Token expired");
         }
 
@@ -116,12 +121,14 @@ function App() {
   function createApplication(event) {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/applications", {
+    fetch(`${API_URL}/applications`, {
       method: "POST",
+
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+
       body: JSON.stringify({
         company,
         position,
@@ -138,25 +145,33 @@ function App() {
         return response.json();
       })
       .then((newApplication) => {
-        setApplications([...applications, newApplication]);
+        setApplications([
+          ...applications,
+          newApplication,
+        ]);
 
         setCompany("");
         setPosition("");
         setSalary("");
         setStatus("applied");
         setNotes("");
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
   function updateProfile(event) {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/me", {
+    fetch(`${API_URL}/me`, {
       method: "PATCH",
+
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+
       body: JSON.stringify({
         name: profileName,
         avatar_url: profileAvatar,
@@ -164,16 +179,28 @@ function App() {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Ошибка обновления профиля");
+          throw new Error(
+            "Ошибка обновления профиля"
+          );
         }
 
         return response.json();
       })
       .then((updatedUser) => {
         setCurrentUser(updatedUser);
-        setProfileName(updatedUser.name || "");
-        setProfileAvatar(updatedUser.avatar_url || "");
+
+        setProfileName(
+          updatedUser.name || ""
+        );
+
+        setProfileAvatar(
+          updatedUser.avatar_url || ""
+        );
+
         setShowProfile(false);
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
@@ -182,29 +209,47 @@ function App() {
 
     const formData = new URLSearchParams();
 
-    formData.append("username", loginEmail);
-    formData.append("password", loginPassword);
+    formData.append(
+      "username",
+      loginEmail
+    );
 
-    fetch("http://127.0.0.1:8000/login", {
+    formData.append(
+      "password",
+      loginPassword
+    );
+
+    fetch(`${API_URL}/login`, {
       method: "POST",
+
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type":
+          "application/x-www-form-urlencoded",
       },
+
       body: formData,
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Неверный email или пароль");
+          throw new Error(
+            "Неверный email или пароль"
+          );
         }
 
         return response.json();
       })
       .then((data) => {
-        localStorage.setItem("token", data.access_token);
+        localStorage.setItem(
+          "token",
+          data.access_token
+        );
 
         setApplications([]);
         setCurrentUser(null);
         setToken(data.access_token);
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
@@ -218,73 +263,100 @@ function App() {
   }
 
   function deleteApplication(id) {
-    fetch(`http://127.0.0.1:8000/applications/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error("Ошибка удаления");
-      }
+    fetch(
+      `${API_URL}/applications/${id}`,
+      {
+        method: "DELETE",
 
-      setApplications(
-        applications.filter(
-          (application) => application.id !== id
-        )
-      );
-    });
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            "Ошибка удаления"
+          );
+        }
+
+        setApplications(
+          applications.filter(
+            (application) =>
+              application.id !== id
+          )
+        );
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   function updateStatus(id, newStatus) {
     const application = applications.find(
-      (application) => application.id === id
+      (application) =>
+        application.id === id
     );
 
-    fetch(`http://127.0.0.1:8000/applications/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        company: application.company,
-        position: application.position,
-        salary: application.salary,
-        notes: application.notes,
-        status: newStatus,
-      }),
-    })
+    fetch(
+      `${API_URL}/applications/${id}`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          company: application.company,
+          position: application.position,
+          salary: application.salary,
+          notes: application.notes,
+          status: newStatus,
+        }),
+      }
+    )
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Ошибка обновления");
+          throw new Error(
+            "Ошибка обновления"
+          );
         }
 
         return response.json();
       })
       .then((updatedApplication) => {
         setApplications(
-          applications.map((application) =>
-            application.id === id
-              ? updatedApplication
-              : application
+          applications.map(
+            (application) =>
+              application.id === id
+                ? updatedApplication
+                : application
           )
         );
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
   function formatSalary(salary) {
-    return new Intl.NumberFormat("ru-RU").format(salary);
+    return new Intl.NumberFormat(
+      "ru-RU"
+    ).format(salary);
   }
 
   function registerUser(event) {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/register", {
+    fetch(`${API_URL}/register`, {
       method: "POST",
+
       headers: {
         "Content-Type": "application/json",
       },
+
       body: JSON.stringify({
         name: registerName,
         email: registerEmail,
@@ -293,7 +365,9 @@ function App() {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Ошибка регистрации");
+          throw new Error(
+            "Ошибка регистрации"
+          );
         }
 
         return response.json();
@@ -306,26 +380,37 @@ function App() {
         setRegisterPassword("");
 
         setAuthMode("login");
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }
 
-  const interviewCount = applications.filter(
-    (application) => application.status === "interview"
-  ).length;
+  const interviewCount =
+    applications.filter(
+      (application) =>
+        application.status === "interview"
+    ).length;
 
-  const offerCount = applications.filter(
-    (application) => application.status === "offer"
-  ).length;
+  const offerCount =
+    applications.filter(
+      (application) =>
+        application.status === "offer"
+    ).length;
 
-  const rejectedCount = applications.filter(
-    (application) => application.status === "rejected"
-  ).length;
+  const rejectedCount =
+    applications.filter(
+      (application) =>
+        application.status === "rejected"
+    ).length;
 
   if (!token) {
     return (
       <div className="login-page">
         <div className="login-card">
-          <div className="logo-icon">J</div>
+          <div className="logo-icon">
+            J
+          </div>
 
           <h1>JobFlow</h1>
 
@@ -336,7 +421,9 @@ function App() {
                   ? "auth-tab active"
                   : "auth-tab"
               }
-              onClick={() => setAuthMode("login")}
+              onClick={() =>
+                setAuthMode("login")
+              }
             >
               Войти
             </button>
@@ -347,7 +434,9 @@ function App() {
                   ? "auth-tab active"
                   : "auth-tab"
               }
-              onClick={() => setAuthMode("register")}
+              onClick={() =>
+                setAuthMode("register")
+              }
             >
               Регистрация
             </button>
@@ -360,7 +449,9 @@ function App() {
                 placeholder="Email"
                 value={loginEmail}
                 onChange={(event) =>
-                  setLoginEmail(event.target.value)
+                  setLoginEmail(
+                    event.target.value
+                  )
                 }
                 required
               />
@@ -370,7 +461,9 @@ function App() {
                 placeholder="Пароль"
                 value={loginPassword}
                 onChange={(event) =>
-                  setLoginPassword(event.target.value)
+                  setLoginPassword(
+                    event.target.value
+                  )
                 }
                 required
               />
@@ -383,13 +476,17 @@ function App() {
               </button>
             </form>
           ) : (
-            <form onSubmit={registerUser}>
+            <form
+              onSubmit={registerUser}
+            >
               <input
                 type="text"
                 placeholder="Имя"
                 value={registerName}
                 onChange={(event) =>
-                  setRegisterName(event.target.value)
+                  setRegisterName(
+                    event.target.value
+                  )
                 }
                 required
               />
@@ -399,7 +496,9 @@ function App() {
                 placeholder="Email"
                 value={registerEmail}
                 onChange={(event) =>
-                  setRegisterEmail(event.target.value)
+                  setRegisterEmail(
+                    event.target.value
+                  )
                 }
                 required
               />
@@ -409,7 +508,9 @@ function App() {
                 placeholder="Пароль"
                 value={registerPassword}
                 onChange={(event) =>
-                  setRegisterPassword(event.target.value)
+                  setRegisterPassword(
+                    event.target.value
+                  )
                 }
                 required
               />
@@ -431,11 +532,16 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="logo">
-          <div className="logo-icon">J</div>
+          <div className="logo-icon">
+            J
+          </div>
 
           <div>
             <h1>JobFlow</h1>
-            <span>Application Tracker</span>
+
+            <span>
+              Application Tracker
+            </span>
           </div>
         </div>
 
@@ -443,7 +549,9 @@ function App() {
           {currentUser?.avatar_url ? (
             <img
               className="profile-avatar"
-              src={currentUser.avatar_url}
+              src={
+                currentUser.avatar_url
+              }
               alt="avatar"
             />
           ) : (
@@ -460,7 +568,9 @@ function App() {
 
           <button
             className="profile-button"
-            onClick={() => setShowProfile(true)}
+            onClick={() =>
+              setShowProfile(true)
+            }
           >
             Профиль
           </button>
@@ -477,11 +587,15 @@ function App() {
       {showProfile && (
         <div
           className="profile-overlay"
-          onClick={() => setShowProfile(false)}
+          onClick={() =>
+            setShowProfile(false)
+          }
         >
           <div
             className="profile-modal"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
           >
             <div className="profile-modal-header">
               <div>
@@ -494,13 +608,17 @@ function App() {
 
               <button
                 className="profile-close"
-                onClick={() => setShowProfile(false)}
+                onClick={() =>
+                  setShowProfile(false)
+                }
               >
                 ×
               </button>
             </div>
 
-            <form onSubmit={updateProfile}>
+            <form
+              onSubmit={updateProfile}
+            >
               <div className="profile-avatar-section">
                 {profileAvatar ? (
                   <img
@@ -517,30 +635,41 @@ function App() {
                 )}
 
                 <div>
-                  <strong>{profileName}</strong>
-                  <p>{currentUser?.email}</p>
+                  <strong>
+                    {profileName}
+                  </strong>
+
+                  <p>
+                    {currentUser?.email}
+                  </p>
                 </div>
               </div>
 
               <label>
                 Имя
+
                 <input
                   type="text"
                   value={profileName}
                   onChange={(event) =>
-                    setProfileName(event.target.value)
+                    setProfileName(
+                      event.target.value
+                    )
                   }
                 />
               </label>
 
               <label>
                 URL аватарки
+
                 <input
                   type="text"
                   placeholder="https://..."
                   value={profileAvatar}
                   onChange={(event) =>
-                    setProfileAvatar(event.target.value)
+                    setProfileAvatar(
+                      event.target.value
+                    )
                   }
                 />
               </label>
@@ -549,7 +678,9 @@ function App() {
                 <button
                   type="button"
                   className="profile-cancel"
-                  onClick={() => setShowProfile(false)}
+                  onClick={() =>
+                    setShowProfile(false)
+                  }
                 >
                   Отмена
                 </button>
@@ -576,52 +707,82 @@ function App() {
             <h2>
               Найди работу.
               <br />
+
               <span>
                 Не потеряй ни один отклик.
               </span>
             </h2>
 
             <p>
-              Управляй вакансиями, следи за этапами и
-              смотри, как растёт твоя конверсия.
+              Управляй вакансиями,
+              следи за этапами и смотри,
+              как растёт твоя конверсия.
             </p>
           </div>
         </section>
 
         <section className="stats">
           <div className="stat-card">
-            <div className="stat-icon purple">◎</div>
+            <div className="stat-icon purple">
+              ◎
+            </div>
 
             <div>
-              <span>Всего откликов</span>
-              <strong>{applications.length}</strong>
+              <span>
+                Всего откликов
+              </span>
+
+              <strong>
+                {applications.length}
+              </strong>
             </div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon blue">⌁</div>
+            <div className="stat-icon blue">
+              ⌁
+            </div>
 
             <div>
-              <span>Интервью</span>
-              <strong>{interviewCount}</strong>
+              <span>
+                Интервью
+              </span>
+
+              <strong>
+                {interviewCount}
+              </strong>
             </div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon green">✓</div>
+            <div className="stat-icon green">
+              ✓
+            </div>
 
             <div>
-              <span>Офферы</span>
-              <strong>{offerCount}</strong>
+              <span>
+                Офферы
+              </span>
+
+              <strong>
+                {offerCount}
+              </strong>
             </div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon red">×</div>
+            <div className="stat-icon red">
+              ×
+            </div>
 
             <div>
-              <span>Отказы</span>
-              <strong>{rejectedCount}</strong>
+              <span>
+                Отказы
+              </span>
+
+              <strong>
+                {rejectedCount}
+              </strong>
             </div>
           </div>
         </section>
@@ -634,21 +795,32 @@ function App() {
                   NEW APPLICATION
                 </span>
 
-                <h3>Добавить вакансию</h3>
+                <h3>
+                  Добавить вакансию
+                </h3>
               </div>
 
-              <div className="plus">+</div>
+              <div className="plus">
+                +
+              </div>
             </div>
 
-            <form onSubmit={createApplication}>
+            <form
+              onSubmit={
+                createApplication
+              }
+            >
               <label>
                 Компания
+
                 <input
                   type="text"
                   placeholder="Например, Ozon"
                   value={company}
                   onChange={(event) =>
-                    setCompany(event.target.value)
+                    setCompany(
+                      event.target.value
+                    )
                   }
                   required
                 />
@@ -656,12 +828,15 @@ function App() {
 
               <label>
                 Должность
+
                 <input
                   type="text"
                   placeholder="Python Backend Developer"
                   value={position}
                   onChange={(event) =>
-                    setPosition(event.target.value)
+                    setPosition(
+                      event.target.value
+                    )
                   }
                   required
                 />
@@ -670,12 +845,15 @@ function App() {
               <div className="form-row">
                 <label>
                   Зарплата
+
                   <input
                     type="number"
                     placeholder="150000"
                     value={salary}
                     onChange={(event) =>
-                      setSalary(event.target.value)
+                      setSalary(
+                        event.target.value
+                      )
                     }
                     required
                   />
@@ -683,27 +861,35 @@ function App() {
 
                 <label>
                   Статус
+
                   <select
                     value={status}
                     onChange={(event) =>
-                      setStatus(event.target.value)
+                      setStatus(
+                        event.target.value
+                      )
                     }
                   >
                     <option value="applied">
                       Отклик
                     </option>
+
                     <option value="screening">
                       Скрининг
                     </option>
+
                     <option value="interview">
                       Интервью
                     </option>
+
                     <option value="test_task">
                       Тестовое
                     </option>
+
                     <option value="offer">
                       Оффер
                     </option>
+
                     <option value="rejected">
                       Отказ
                     </option>
@@ -713,11 +899,14 @@ function App() {
 
               <label>
                 Заметки
+
                 <textarea
                   placeholder="Рекрутер, этапы, ссылка, впечатления..."
                   value={notes}
                   onChange={(event) =>
-                    setNotes(event.target.value)
+                    setNotes(
+                      event.target.value
+                    )
                   }
                 />
               </label>
@@ -726,7 +915,10 @@ function App() {
                 className="submit-button"
                 type="submit"
               >
-                <span>Добавить вакансию</span>
+                <span>
+                  Добавить вакансию
+                </span>
+
                 <span>→</span>
               </button>
             </form>
@@ -739,7 +931,9 @@ function App() {
                   PIPELINE
                 </span>
 
-                <h3>Мои отклики</h3>
+                <h3>
+                  Мои отклики
+                </h3>
               </div>
 
               <span className="application-count">
@@ -749,14 +943,18 @@ function App() {
 
             <div className="applications-toolbar">
               <div className="search-box">
-                <span className="search-icon">⌕</span>
+                <span className="search-icon">
+                  ⌕
+                </span>
 
                 <input
                   type="text"
                   placeholder="Поиск по компании или должности..."
                   value={search}
                   onChange={(event) =>
-                    setSearch(event.target.value)
+                    setSearch(
+                      event.target.value
+                    )
                   }
                 />
               </div>
@@ -765,7 +963,9 @@ function App() {
                 className="sort-select"
                 value={sort}
                 onChange={(event) =>
-                  setSort(event.target.value)
+                  setSort(
+                    event.target.value
+                  )
                 }
               >
                 <option value="">
@@ -793,7 +993,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("all")}
+                onClick={() =>
+                  setFilter("all")
+                }
               >
                 Все
               </button>
@@ -804,7 +1006,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("applied")}
+                onClick={() =>
+                  setFilter("applied")
+                }
               >
                 Отклик
               </button>
@@ -815,7 +1019,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("screening")}
+                onClick={() =>
+                  setFilter("screening")
+                }
               >
                 Скрининг
               </button>
@@ -826,7 +1032,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("interview")}
+                onClick={() =>
+                  setFilter("interview")
+                }
               >
                 Интервью
               </button>
@@ -837,7 +1045,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("test_task")}
+                onClick={() =>
+                  setFilter("test_task")
+                }
               >
                 Тестовое
               </button>
@@ -848,7 +1058,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("offer")}
+                onClick={() =>
+                  setFilter("offer")
+                }
               >
                 Оффер
               </button>
@@ -859,7 +1071,9 @@ function App() {
                     ? "filter-button active"
                     : "filter-button"
                 }
-                onClick={() => setFilter("rejected")}
+                onClick={() =>
+                  setFilter("rejected")
+                }
               >
                 Отказ
               </button>
@@ -868,9 +1082,13 @@ function App() {
             <div className="applications-list">
               {filteredApplications.length === 0 ? (
                 <div className="empty-state">
-                  <div>⌕</div>
+                  <div>
+                    ⌕
+                  </div>
 
-                  <h3>Ничего не найдено</h3>
+                  <h3>
+                    Ничего не найдено
+                  </h3>
 
                   <p>
                     Для этого фильтра пока нет вакансий.
@@ -893,17 +1111,23 @@ function App() {
                         <div className="application-top">
                           <div>
                             <h4>
-                              {application.company}
+                              {
+                                application.company
+                              }
                             </h4>
 
                             <p>
-                              {application.position}
+                              {
+                                application.position
+                              }
                             </p>
                           </div>
 
                           <select
                             className={`status-select status-${application.status}`}
-                            value={application.status}
+                            value={
+                              application.status
+                            }
                             onChange={(event) =>
                               updateStatus(
                                 application.id,
@@ -947,7 +1171,9 @@ function App() {
 
                           {application.notes && (
                             <span className="notes">
-                              {application.notes}
+                              {
+                                application.notes
+                              }
                             </span>
                           )}
                         </div>

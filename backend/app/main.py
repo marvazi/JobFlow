@@ -10,15 +10,17 @@ app = FastAPI(title="JobFlow API")
 
 Base.metadata.create_all(bind=engine)
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.onrender\.com",
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://jobflow-1-iyuj.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(auth.router)
 app.include_router(users.router)
