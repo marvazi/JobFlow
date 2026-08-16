@@ -707,3 +707,169 @@ select option {
   background: rgba(128, 108, 255, 0.16);
   border-color: rgba(128, 108, 255, 0.45);
 }
+.login-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(124, 92, 255, 0.2),
+      transparent 35%
+    ),
+    #0b0c10;
+}
+
+.login-card {
+  width: 380px;
+
+  padding: 35px;
+
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  text-align: center;
+}
+
+.login-card .logo-icon {
+  margin: 0 auto 20px;
+}
+
+.login-card h1 {
+  margin-bottom: 8px;
+}
+
+.login-card p {
+  color: #777b8c;
+  margin-bottom: 25px;
+}
+
+.logout-button {
+  border: none;
+  background: transparent;
+  color: #888c9b;
+
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  color: #ff7485;
+}
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  padding: 5px;
+  margin: 25px 0;
+
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.auth-tab {
+  border: none;
+  border-radius: 9px;
+
+  padding: 10px;
+
+  background: transparent;
+  color: #777b8c;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.auth-tab.active {
+  color: white;
+  background: rgba(128, 108, 255, 0.16);
+}
+.profile-avatar,
+.profile-avatar-fallback {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.profile-avatar {
+  object-fit: cover;
+}
+
+.profile-avatar-fallback {
+  display: grid;
+  place-items: center;
+
+  background: rgba(128, 108, 255, 0.18);
+  color: #a79dff;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profile-button {
+  border: none;
+  background: transparent;
+  color: #9a9eac;
+  cursor: pointer;
+}
+
+.profile-button:hover {
+  color: white;
+}
+
+.profile-panel {
+  width: min(400px, 90%);
+  margin: 20px auto;
+
+  padding: 25px;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-panel h3 {
+  margin-top: 0;
+}
+
+.profile-preview {
+  width: 90px;
+  height: 90px;
+
+  object-fit: cover;
+  border-radius: 50%;
+
+  margin: 10px auto;
+}
+
+.search-box {
+  margin-bottom: 16px;
+}
+
+.search-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: rgba(130, 110, 255, 0.7);
+}
+
+.search-box input::placeholder {
+  color: #777b8a;
+}

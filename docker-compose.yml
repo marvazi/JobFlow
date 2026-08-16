@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: job_tracker
+      POSTGRES_USER: attorazizov
+      POSTGRES_PASSWORD: jobflowpass
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    ports:
+      - "5433:5432"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://attorazizov:jobflowpass@db:5432/job_tracker
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
